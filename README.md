@@ -4,6 +4,8 @@ Browse, filter, and explore your YouTube watch history. Upload the
 `watch-history.html` file from a [Google Takeout](https://takeout.google.com/)
 export and get a sortable, filterable grid of everything you've watched.
 
+![Homepage](docs/screenshots/landing.png)
+
 ## Features
 
 - **Upload & parse** Google Takeout watch history (`watch-history.html` & `watch-history.json`)
@@ -60,6 +62,9 @@ pnpm run tauri dev
 3. Upload `watch-history.html` (or `.json`) and let it parse.
 
 ## Roadmap
+- Bugs
+  - [ ] Fix bug where navigation doesnt work on release version (windows)
+  - [ ] Change app icon
 - [ ] Properly handle hitting usage limits
   - [ ] Handle invalid API Key
 - [x] Clean up UI
