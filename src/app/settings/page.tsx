@@ -75,14 +75,12 @@ export default function SettingsPage() {
                                     placeholder="AIza..."
                                     spellCheck={false}
                                     autoComplete="off"
-                                    aria-label="YouTube Data API key"
                                     className="h-7 w-full rounded-sm border border-line-strong bg-surface px-2 font-mono text-[11px] text-fg placeholder:text-fg-subtle focus:border-focus focus:outline-none"
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowKey((v) => !v)}
                                     title={showKey ? "Hide key" : "Show key"}
-                                    aria-label={showKey ? "Hide key" : "Show key"}
                                     className="grid size-7 shrink-0 cursor-pointer place-items-center rounded-sm border border-line-strong bg-surface text-fg-muted transition-colors hover:bg-sunken hover:text-fg"
                                 >
                                     {showKey ? <LuEyeOff className="size-3.5" /> : <LuEye className="size-3.5" />}
@@ -90,7 +88,7 @@ export default function SettingsPage() {
                             </div>
 
                             <p className="mt-2 flex items-start gap-1.5 text-[11px] text-fg-subtle">
-                                <LuTriangleAlert aria-hidden className="mt-px size-3 shrink-0 text-warn" />
+                                <LuTriangleAlert className="mt-px size-3 shrink-0 text-warn" />
                                 <span>
                                     Stored in plaintext on this machine.
                                     {hasStoredKey && " A key is currently saved."}
@@ -107,8 +105,8 @@ export default function SettingsPage() {
                                     }
                                 >
                                     {message.tone === 'ok'
-                                        ? <LuCircleCheck aria-hidden className="mt-px size-3.5 shrink-0" />
-                                        : <LuTriangleAlert aria-hidden className="mt-px size-3.5 shrink-0" />}
+                                        ? <LuCircleCheck className="mt-px size-3.5 shrink-0" />
+                                        : <LuTriangleAlert className="mt-px size-3.5 shrink-0" />}
                                     <span>{message.text}</span>
                                 </div>
                             )}
@@ -141,7 +139,7 @@ export default function SettingsPage() {
                             onClick={async () => { await invoke('open_location'); }}
                             className="inline-flex h-7 cursor-pointer items-center gap-1.5 rounded-md border border-line bg-surface px-3 text-[12px] font-medium text-fg transition-colors hover:bg-sunken"
                         >
-                            <LuFolderOpen aria-hidden className="size-3.5" />
+                            <LuFolderOpen className="size-3.5" />
                             Open app folder
                         </button>
                     </Section>
@@ -153,7 +151,7 @@ export default function SettingsPage() {
                             rel="noopener noreferrer"
                             className="inline-flex h-7 items-center gap-1.5 rounded-md border border-line bg-surface px-3 text-[12px] font-medium text-fg transition-colors hover:bg-sunken"
                         >
-                            <LuGithub aria-hidden className="size-3.5" />
+                            <LuGithub className="size-3.5" />
                             Source on GitHub
                         </a>
                     </Section>

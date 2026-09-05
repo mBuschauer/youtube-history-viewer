@@ -57,7 +57,6 @@ export default function VideoPanel({ row, video, loading, onClose }: VideoPanelP
                         type="button"
                         onClick={onRefresh}
                         disabled={!row.video_id || refreshing}
-                        aria-label="Refetch metadata from YouTube"
                         title="Refetch from YouTube (shows on next open)"
                         className="grid size-6 cursor-pointer place-items-center rounded-sm text-fg-subtle transition-colors hover:bg-sunken hover:text-fg disabled:cursor-default disabled:opacity-40"
                     >
@@ -66,7 +65,6 @@ export default function VideoPanel({ row, video, loading, onClose }: VideoPanelP
                     <button
                         type="button"
                         onClick={onClose}
-                        aria-label="Close details panel"
                         title="Close (Esc)"
                         className="grid size-6 cursor-pointer place-items-center rounded-sm text-fg-subtle transition-colors hover:bg-sunken hover:text-fg"
                     >
@@ -103,10 +101,7 @@ export default function VideoPanel({ row, video, loading, onClose }: VideoPanelP
                                 className="group inline-flex items-start gap-1 hover:text-accent-text"
                             >
                                 <span>{title}</span>
-                                <LuExternalLink
-                                    aria-hidden
-                                    className="mt-0.5 size-3 shrink-0 text-fg-subtle group-hover:text-accent-text"
-                                />
+                                <LuExternalLink className="mt-0.5 size-3 shrink-0 text-fg-subtle group-hover:text-accent-text" />
                             </a>
                         ) : (
                             title
@@ -137,7 +132,7 @@ export default function VideoPanel({ row, video, loading, onClose }: VideoPanelP
 
                     {loading ? (
                         <div className="flex items-center gap-2 px-3 py-2 text-[12px] text-fg-muted">
-                            <LuLoaderCircle aria-hidden className="size-3.5 animate-spin" />
+                            <LuLoaderCircle className="size-3.5 animate-spin" />
                             Loading metadata
                         </div>
                     ) : video ? (
@@ -153,7 +148,7 @@ export default function VideoPanel({ row, video, loading, onClose }: VideoPanelP
                         </>
                     ) : (
                         <div className="flex items-start gap-2 px-3 py-2.5 text-[12px] text-fg-muted">
-                            <LuCircleSlash aria-hidden className="mt-px size-3.5 shrink-0 text-fg-subtle" />
+                            <LuCircleSlash className="mt-px size-3.5 shrink-0 text-fg-subtle" />
                             <span>
                                 No metadata available. This video is private, deleted, or otherwise
                                 not returned by the YouTube API.

@@ -21,7 +21,7 @@ function Shell({ children, count }: { children: React.ReactNode; count?: number 
           href="/upload"
           className="ml-auto inline-flex h-6 items-center gap-1.5 rounded-sm bg-accent px-2.5 text-[12px] font-medium text-on-accent transition-colors hover:bg-accent-hover"
         >
-          <LuPlus className="size-3.5" aria-hidden />
+          <LuPlus className="size-3.5" />
           Import
         </Link>
       </div>
@@ -91,7 +91,7 @@ export default function Page() {
               href="/upload"
               className="inline-flex h-7 items-center gap-1.5 rounded-md bg-accent px-3 text-[12px] font-medium text-on-accent transition-colors hover:bg-accent-hover"
             >
-              <LuPlus className="size-3.5" aria-hidden />
+              <LuPlus className="size-3.5" />
               Import watch history
             </Link>
           }

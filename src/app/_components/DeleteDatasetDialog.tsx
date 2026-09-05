@@ -29,14 +29,9 @@ export default function DeleteDatasetDialog({ dataset, deleting, error, onConfir
       }}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4"
     >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="delete-dataset-heading"
-        className="w-full max-w-md rounded-md border border-line bg-raised shadow-pane"
-      >
+      <div className="w-full max-w-md rounded-md border border-line bg-raised shadow-pane" >
         <div className="flex items-start gap-2.5 p-4">
-          <LuTriangleAlert aria-hidden className="mt-px size-4 shrink-0 text-bad" />
+          <LuTriangleAlert className="mt-px size-4 shrink-0 text-bad" />
           <div className="min-w-0">
             <h2 id="delete-dataset-heading" className="text-[13px] font-semibold text-fg">
               Delete this dataset?
