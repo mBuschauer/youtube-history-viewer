@@ -69,7 +69,7 @@ export default function UploadWatchHistory() {
 
                     {importFile.error && (
                         <div className="mt-4 flex items-start gap-2 rounded-sm border border-bad-line bg-bad-soft px-2.5 py-2 text-[12px] text-bad">
-                            <LuTriangleAlert aria-hidden className="mt-px size-3.5 shrink-0" />
+                            <LuTriangleAlert className="mt-px size-3.5 shrink-0" />
                             <span>{importFile.error}</span>
                         </div>
                     )}
@@ -83,7 +83,7 @@ export default function UploadWatchHistory() {
                                     onClick={pickFile}
                                     className="inline-flex h-7 cursor-pointer items-center gap-1.5 rounded-md border border-line bg-surface px-3 text-[12px] font-medium text-fg transition-colors hover:bg-sunken"
                                 >
-                                    <LuFileInput aria-hidden className="size-3.5" />
+                                    <LuFileInput className="size-3.5" />
                                     Choose file
                                 </button>
                                 {!path && (
@@ -119,7 +119,7 @@ export default function UploadWatchHistory() {
                             className="inline-flex h-7 cursor-pointer items-center gap-1.5 rounded-md bg-accent px-3 text-[12px] font-medium text-on-accent transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:bg-sunken disabled:text-fg-subtle"
                         >
                             {importFile.isPending && (
-                                <LuLoaderCircle aria-hidden className="size-3.5 animate-spin" />
+                                <LuLoaderCircle className="size-3.5 animate-spin" />
                             )}
                             {importFile.isPending ? 'Importing...' : 'Import'}
                         </button>

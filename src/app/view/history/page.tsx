@@ -17,7 +17,7 @@ import { LuLoaderCircle, LuDatabase, LuCloudDownload, LuFolderOpen, LuSearch, Lu
 
 const backToDatasets = (
     <Link href="/" className={paneActionClass}>
-        <LuChevronLeft aria-hidden className="size-3.5" />
+        <LuChevronLeft className="size-3.5" />
         All datasets
     </Link>
 );
@@ -110,17 +110,17 @@ export default function Page() {
                         title="Back to all datasets"
                         className="inline-flex h-6 shrink-0 items-center gap-0.5 rounded-sm pr-1.5 pl-1 text-[12px] text-fg-muted transition-colors hover:bg-sunken hover:text-fg"
                     >
-                        <LuChevronLeft aria-hidden className="size-3.5" />
+                        <LuChevronLeft className="size-3.5" />
                         Datasets
                     </Link>
-                    <span className="shrink-0 text-fg-subtle" aria-hidden>/</span>
+                    <span className="shrink-0 text-fg-subtle">/</span>
                     <span className="max-w-56 truncate text-[12px] font-medium text-fg">
                         {datasetName ?? "Watch history"}
                     </span>
                 </div>
                 {status && <StatusPill status={status} />}
 
-                <span className="mx-1 h-4 w-px bg-line" aria-hidden />
+                <span className="mx-1 h-4 w-px bg-line" />
 
                 <ToolbarButton
                     icon={localRunning ? LuLoaderCircle : LuDatabase}
@@ -139,7 +139,7 @@ export default function Page() {
                     onClick={() => setStage(HydrationStage.Remote)}
                 />
 
-                <span className="mx-1 h-4 w-px bg-line" aria-hidden />
+                <span className="mx-1 h-4 w-px bg-line" />
 
                 <ToolbarButton
                     icon={LuFolderOpen}
@@ -149,14 +149,10 @@ export default function Page() {
                 />
 
                 <div className="relative ml-auto">
-                    <LuSearch
-                        aria-hidden
-                        className="pointer-events-none absolute top-1/2 left-2 size-3.5 -translate-y-1/2 text-fg-subtle"
-                    />
+                    <LuSearch className="pointer-events-none absolute top-1/2 left-2 size-3.5 -translate-y-1/2 text-fg-subtle" />
                     <input
                         type="text"
                         placeholder="Search titles and channels"
-                        aria-label="Search history"
                         value={quickFilter}
                         disabled={!ready}
                         onChange={(e) => setQuickFilter(e.target.value)}
@@ -166,7 +162,6 @@ export default function Page() {
                         <button
                             type="button"
                             onClick={() => setQuickFilter("")}
-                            aria-label="Clear search"
                             className="absolute top-1/2 right-1 grid size-4 -translate-y-1/2 cursor-pointer place-items-center rounded-xs text-fg-subtle transition-colors hover:bg-sunken hover:text-fg"
                         >
                             <LuX className="size-3" />
@@ -260,13 +255,7 @@ export default function Page() {
                 {isHydrating && (
                     <div className="ml-auto flex items-center gap-2">
                         <span className="truncate">{hydratingStatusText}</span>
-                        <div
-                            className="h-1 w-28 overflow-hidden rounded-full bg-sunken"
-                            role="progressbar"
-                            aria-valuenow={progressCurrent}
-                            aria-valuemin={0}
-                            aria-valuemax={progressTotal}
-                        >
+                        <div className="h-1 w-28 overflow-hidden rounded-full bg-sunken" >
                             <div
                                 className="h-full bg-accent transition-[width] duration-300 ease-out"
                                 style={{

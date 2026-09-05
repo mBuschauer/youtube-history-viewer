@@ -28,7 +28,6 @@ export default function NavBar() {
                         <Link
                             key={tab.href}
                             href={tab.href}
-                            aria-current={active ? "page" : undefined}
                             className={
                                 "rounded-sm px-2.5 py-0.75 text-[12px] font-medium transition-colors " +
                                 (active
@@ -71,13 +70,10 @@ function ThemeToggle() {
             type="button"
             onClick={toggle}
             title={isDark ? "Switch to light theme" : "Switch to dark theme"}
-            aria-label={isDark ? "Switch to light theme" : "Switch to dark theme"}
             className="grid size-7 cursor-pointer place-items-center rounded-md text-fg-muted transition-colors hover:bg-sunken hover:text-fg"
         >
-            {/* Swapped by CSS so the first paint is correct without waiting on
-                hydration, and with no crossfade that could show neither icon. */}
-            <LuSun aria-hidden className="size-3.5 dark:hidden" />
-            <LuMoon aria-hidden className="hidden size-3.5 dark:block" />
+            <LuSun className="size-3.5 dark:hidden" />
+            <LuMoon className="hidden size-3.5 dark:block" />
         </button>
     );
 }
