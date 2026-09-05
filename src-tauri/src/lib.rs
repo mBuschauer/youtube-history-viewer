@@ -10,7 +10,7 @@ use uuid::Uuid;
 use crate::{
     db::WatchedHistoryEntry,
     storage::{PROJECTS_DIR, data_root, list_datasets, DatasetMetadata, DatasetStatus, DatasetStorage},
-    videos::{fetch_local_videos, fetch_videos, LocalVideosResponse, VideoEntry},
+    videos::{fetch_videos, VideosResponse},
 };
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
@@ -91,14 +91,20 @@ fn get_dataset_history(id: String) -> Result<Vec<WatchedHistoryEntry>, String> {
 }
 
 #[tauri::command]
-async fn get_local_videos(ids: Vec<String>) -> Result<LocalVideosResponse, String> {
-    fetch_local_videos(&ids).await
+async fn get_local_videos(ids: Vec<String>) -> Result<VideosResponse, String> {
+    fetch_videos(&ids, None, false, false).await
 }
 
 #[tauri::command]
-async fn get_videos(ids: Vec<String>, api_key: String) -> Result<Vec<VideoEntry>, String> {
-    fetch_videos(&ids, &api_key).await
+async fn get_videos(ids: Vec<String>, api_key: String) -> Result<VideosResponse, String> {
+    fetch_videos(&ids, Some(&api_key), true, false).await
 }
+
+#[tauri::command]
+async fn force_get_videos(ids: Vec<String>, api_key: String) -> Result<VideosResponse, String> {
+    fetch_videos(&ids, Some(&api_key), true, true).await
+}
+
 #[cfg(target_os = "linux")]
 fn prefers_no_titlebar() -> bool {
     const TILING: &[&str] = &[ "hyprland", "sway", "i3", "river", "bspwm", "dwm", "awesome", "xmonad", "qtile", "niri", "wayfire", "herbstluftwm", "spectrwm", "leftwm" ];
@@ -143,7 +149,8 @@ pub fn run() {
             get_dataset_status,
             get_dataset_history,
             get_local_videos,
-            get_videos
+            get_videos,
+            force_get_videos
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

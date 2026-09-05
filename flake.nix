@@ -14,6 +14,8 @@
       pkgs = import nixpkgs { inherit system overlays; };
       lib = pkgs.lib;
 
+      packageJson = lib.importJSON ./package.json;
+
       gstPlugins = with pkgs.gst_all_1; [
         gstreamer
         gst-plugins-base
@@ -43,7 +45,7 @@
 
         youtube-history-viewer = rustPlatform.buildRustPackage (finalAttrs: {
           pname = "youtube-history-viewer";
-          version = "0.0.1";
+          inherit (packageJson) version;
           src = lib.fileset.toSource {
             root = ./.;
             fileset = lib.fileset.difference ./. (
