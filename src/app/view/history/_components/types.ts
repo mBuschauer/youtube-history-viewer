@@ -45,11 +45,8 @@ export interface VideoEntry {
     } | null;
 }
 
-/** Result of the `get_local_videos` command. */
-export interface LocalVideosResponse {
-    /** Videos found in the local cache */
+export interface VideosResponse {
     videos: VideoEntry[];
-    /** Ids known to be unavailable from the YouTube API (deleted/private) */
     missing: string[];
 }
 

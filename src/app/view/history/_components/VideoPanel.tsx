@@ -1,6 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { invoke } from "@tauri-apps/api/core";
 import { HistoryRow, VideoEntry, formatDuration } from "./types";
-import { LuX, LuLoaderCircle, LuCircleSlash, LuExternalLink } from "react-icons/lu";
+import { LuX, LuLoaderCircle, LuCircleSlash, LuExternalLink, LuRefreshCw } from "react-icons/lu";
+import { useSettings } from "@/contexts/SettingsContext";
 
 interface VideoPanelProps {
     row: HistoryRow;
@@ -14,6 +16,26 @@ function formatCount(value: string | null | undefined): string {
 }
 
 export default function VideoPanel({ row, video, loading, onClose }: VideoPanelProps) {
+    const { settings } = useSettings();
+
+
+    const [refreshing, setRefreshing] = useState(false);
+
+    const onRefresh = async () => {
+        if (!row.video_id) return;
+        setRefreshing(true);
+        try {
+            await invoke("force_get_videos", {
+                ids: [row.video_id],
+                apiKey: settings.YouTubeApiKey,
+            });
+        } catch (err) {
+            console.error("Forced video refresh failed:", err);
+        } finally {
+            setRefreshing(false);
+        }
+    };
+
     // Close on Escape
     useEffect(() => {
         const onKeyDown = (e: KeyboardEvent) => {
@@ -30,15 +52,27 @@ export default function VideoPanel({ row, video, loading, onClose }: VideoPanelP
         <aside className="flex w-95 shrink-0 flex-col border-l border-line bg-surface">
             <div className="chrome flex h-9 shrink-0 items-center justify-between border-b border-line px-2.5">
                 <span className="text-[12px] font-medium text-fg">Details</span>
-                <button
-                    type="button"
-                    onClick={onClose}
-                    aria-label="Close details panel"
-                    title="Close (Esc)"
-                    className="grid size-6 cursor-pointer place-items-center rounded-sm text-fg-subtle transition-colors hover:bg-sunken hover:text-fg"
-                >
-                    <LuX className="size-3.5" />
-                </button>
+                <div className="flex items-center gap-0.5">
+                    <button
+                        type="button"
+                        onClick={onRefresh}
+                        disabled={!row.video_id || refreshing}
+                        aria-label="Refetch metadata from YouTube"
+                        title="Refetch from YouTube (shows on next open)"
+                        className="grid size-6 cursor-pointer place-items-center rounded-sm text-fg-subtle transition-colors hover:bg-sunken hover:text-fg disabled:cursor-default disabled:opacity-40"
+                    >
+                        <LuRefreshCw className={`size-3.5 ${refreshing ? "animate-spin" : ""}`} />
+                    </button>
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        aria-label="Close details panel"
+                        title="Close (Esc)"
+                        className="grid size-6 cursor-pointer place-items-center rounded-sm text-fg-subtle transition-colors hover:bg-sunken hover:text-fg"
+                    >
+                        <LuX className="size-3.5" />
+                    </button>
+                </div>
             </div>
 
             <div className="selectable min-h-0 flex-1 overflow-y-auto">

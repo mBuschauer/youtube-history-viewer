@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
   // server at runtime: no server components, route handlers, or image
   // optimization. All data access goes through Tauri commands.
   output: "export",
+  trailingSlash: true,
   images: { unoptimized: true },
 };
 

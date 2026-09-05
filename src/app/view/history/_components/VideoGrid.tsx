@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { AgGridReact, CustomCellRendererProps } from "ag-grid-react";
 import { AllCommunityModule, ModuleRegistry, themeQuartz, ColDef, GridReadyEvent, RowClickedEvent, ModelUpdatedEvent } from "ag-grid-community";
 import { invoke } from "@tauri-apps/api/core";
-import { HistoryRow, LocalVideosResponse, VideoEntry, formatDuration, nextStage, type Selection, HydrationStage } from "./types";
+import { HistoryRow, VideosResponse, VideoEntry, formatDuration, nextStage, type Selection, HydrationStage } from "./types";
 
 
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -234,7 +234,7 @@ export default function VideoGrid({ id, apiKey, quickFilter, hydrationStage, onS
             const chunk = ids.slice(i, i + 500);
             const before = pendingRef.current.size;
             try {
-                const { videos, missing } = await invoke<LocalVideosResponse>(
+                const { videos, missing } = await invoke<VideosResponse>(
                     "get_local_videos",
                     { ids: chunk }
                 );
@@ -273,13 +273,12 @@ export default function VideoGrid({ id, apiKey, quickFilter, hydrationStage, onS
         for (let i = 0; i < ids.length; i += 50) {
             const chunk = ids.slice(i, i + 50);
             try {
-                const videos = await invoke<VideoEntry[]>("get_videos", {
+                const { videos, missing } = await invoke<VideosResponse>("get_videos", {
                     ids: chunk,
                     apiKey: key,
                 });
                 applyVideos(videos);
-                const returned = new Set(videos.map((v) => v.id));
-                markUnavailable(chunk.filter((vid) => !returned.has(vid)));
+                markUnavailable(missing ?? []);
             } catch (err) {
                 console.error("External API fetch failed:", err);
             }
@@ -374,15 +373,17 @@ export default function VideoGrid({ id, apiKey, quickFilter, hydrationStage, onS
 
         if (needsFetch && row.video_id) {
             try {
-                const videos = await invoke<VideoEntry[]>("get_videos", {
+                const { videos, missing } = await invoke<VideosResponse>("get_videos", {
                     ids: [row.video_id],
                     apiKey: apiKey,
                 });
                 if (videos.length > 0) applyVideos(videos);
-                else markUnavailable([row.video_id]);
+                if (missing?.length) markUnavailable(missing);
+
+                const fetched = videos.find((v) => v.id === row.video_id) ?? null;
                 setSelected((prev) =>
                     prev && prev.row.id === row.id
-                        ? { row: prev.row, video: videos[0] ?? null, loading: false }
+                        ? { row: prev.row, video: fetched, loading: false }
                         : prev
                 );
             } catch (err) {

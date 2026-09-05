@@ -457,107 +457,16 @@ fn get_video(conn: &Connection, id: &str) -> SqlResult<Option<VideoEntry>> {
     }
 }
 
-/// Fetch video data from YouTube API
-/// Takes in a slice of video IDs and a YouTube API key.
-/// Limits the request to a maximum of 50 video IDs.
-pub async fn fetch_videos(ids: &[String], api_key: &str) -> Result<Vec<VideoEntry>, String> {
-    if ids.len() > 50 {
-        return Err("Cannot request more than 50 video IDs at once".to_string());
-    }
-
-    if ids.is_empty() {
-        return Ok(Vec::new());
-    }
-
-    // Open connection and initialize
-    let conn = Connection::open(video_cache_path())
-        .map_err(|e| format!("Failed to open DB: {}", e))?;
-    if let Err(e) = init_db(&conn) {
-        return Err(format!("Failed to initialize DB: {}", e));
-    }
-
-    let mut result = Vec::new();
-    let mut missing_ids = Vec::new();
-
-    // Check DB first
-    for id in ids {
-        match get_video(&conn, id) {
-            Ok(Some(video)) => result.push(video),
-            _ => missing_ids.push(id.clone()),
-        }
-    }
-
-    if missing_ids.is_empty() {
-        return Ok(result);
-    }
-
-    let tombstoned = get_valid_tombstones(&conn, &missing_ids).map_err(|e| format!("Failed to read missing-video cache: {}", e))?;
-    let to_fetch: Vec<String> = missing_ids
-        .into_iter()
-        .filter(|id| !tombstoned.contains(id))
-        .collect();
-
-    if to_fetch.is_empty() {
-        return Ok(result);
-    }
-
-    let client = reqwest::Client::new();
-    let parts = "snippet,contentDetails,statistics,status,topicDetails,player,liveStreamingDetails";
-    let ids_csv = to_fetch.join(",");
-    let url = format!(
-        "https://www.googleapis.com/youtube/v3/videos?part={}&id={}&key={}",
-        parts, ids_csv, api_key
-    );
-
-    let res = client.get(&url).send().await.map_err(|e| e.to_string())?;
-
-    if res.status().is_success() {
-        let data: VideoListResponse = res.json().await.map_err(|e| e.to_string())?;
-        let mut returned: HashSet<String> = HashSet::new();
-        for video in data.items {
-            if let Err(e) = insert_video(&conn, &video) {
-                eprintln!("Failed to insert video into DB: {}", e);
-            }
-            // A previously-tombstoned video may have become available again
-            if let Err(e) = clear_missing(&conn, &video.id) {
-                eprintln!("Failed to clear missing-video entry: {}", e);
-            }
-
-            returned.insert(video.id.clone());
-            result.push(video);
-        }
-
-        // Anything requested but not returned is gone (deleted/private):
-        // tombstone it so we never spend quota on it again.
-        // Only done on a successful response, so API failures don't create tombstones.
-        let absent: Vec<String> = to_fetch
-            .into_iter()
-            .filter(|id| !returned.contains(id))
-            .collect();
-        if !absent.is_empty() {
-            if let Err(e) = mark_missing(&conn, &absent) {
-                eprintln!("Failed to record missing videos: {}", e);
-            }
-        }
-    } else {
-        return Err(format!("YouTube API request failed with status: {}", res.status()));
-    }
-
-    Ok(result)
-}
-
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct LocalVideosResponse {
-    /// Videos found in the local cache
+pub struct VideosResponse {
     pub videos: Vec<VideoEntry>,
-    /// Ids known to be unavailable from the YouTube API (deleted/private)
     pub missing: Vec<String>,
 }
 
-pub async fn fetch_local_videos(ids: &[String]) -> Result<LocalVideosResponse, String> {
+pub async fn fetch_videos(ids: &[String], api_key: Option<&str>, online: bool, force: bool ) -> Result<VideosResponse, String> {
     if ids.is_empty() {
-        return Ok(LocalVideosResponse {
+        return Ok(VideosResponse {
             videos: Vec::new(),
             missing: Vec::new(),
         });
@@ -570,22 +479,95 @@ pub async fn fetch_local_videos(ids: &[String]) -> Result<LocalVideosResponse, S
         return Err(format!("Failed to initialize DB: {}", e));
     }
 
-    let mut videos = Vec::new();
-    let mut uncached = Vec::new();
+    let mut videos: Vec<VideoEntry> = Vec::new();
+    let mut missing: Vec<String> = Vec::new();
+    let to_fetch: Vec<String>;
 
-    for id in ids {
-        match get_video(&conn, id) {
-            Ok(Some(video)) => videos.push(video),
-            _ => uncached.push(id.clone()),
+    if online && force {
+        // Skip the cache read entirely; everything gets refetched and overwritten.
+        to_fetch = ids.to_vec();
+    } else {
+        let mut uncached: Vec<String> = Vec::new();
+        for id in ids {
+            match get_video(&conn, id) {
+                Ok(Some(video)) => videos.push(video),
+                _ => uncached.push(id.clone()),
+            }
         }
+
+        let tombstoned = get_valid_tombstones(&conn, &uncached)
+            .map_err(|e| format!("Failed to read missing-video cache: {}", e))?;
+
+        to_fetch = if online {
+            uncached
+                .into_iter()
+                .filter(|id| !tombstoned.contains(id))
+                .collect()
+        } else {
+            Vec::new()
+        };
+
+        missing = tombstoned.into_iter().collect();
     }
 
-    // Of the uncached ids, report the ones known to be unavailable so the
-    // frontend doesn't ask the YouTube API for them.
-    let missing = get_valid_tombstones(&conn, &uncached)
-        .map_err(|e| format!("Failed to read missing-video cache: {}", e))?
-        .into_iter()
-        .collect();
+    if to_fetch.is_empty() {
+        return Ok(VideosResponse { videos, missing });
+    }
 
-    Ok(LocalVideosResponse { videos, missing })
+    let api_key = api_key.ok_or_else(|| "An API key is required for an online fetch".to_string())?;
+
+    if to_fetch.len() > 50 {
+        return Err(format!(
+            "Cannot request more than 50 video IDs at once (needed {})",
+            to_fetch.len()
+        ));
+    }
+
+    let client = reqwest::Client::new();
+    let parts = "snippet,contentDetails,statistics,status,topicDetails,player,liveStreamingDetails";
+    let ids_csv = to_fetch.join(",");
+    let url = format!(
+        "https://www.googleapis.com/youtube/v3/videos?part={}&id={}&key={}",
+        parts, ids_csv, api_key
+    );
+
+    let res = client.get(&url).send().await.map_err(|e| e.to_string())?;
+
+    if !res.status().is_success() {
+        return Err(format!(
+            "YouTube API request failed with status: {}",
+            res.status()
+        ));
+    }
+
+    let data: VideoListResponse = res.json().await.map_err(|e| e.to_string())?;
+    let mut returned: HashSet<String> = HashSet::new();
+    for video in data.items {
+        if let Err(e) = insert_video(&conn, &video) {
+            eprintln!("Failed to insert video into DB: {}", e);
+        }
+        // A previously-tombstoned video may have become available again
+        if let Err(e) = clear_missing(&conn, &video.id) {
+            eprintln!("Failed to clear missing-video entry: {}", e);
+        }
+
+        returned.insert(video.id.clone());
+        videos.push(video);
+    }
+
+    // Anything requested but not returned is gone (deleted/private):
+    // tombstone it so we never spend quota on it again.
+    // Only done on a successful response, so API failures don't create tombstones.
+    let absent: Vec<String> = to_fetch
+        .into_iter()
+        .filter(|id| !returned.contains(id))
+        .collect();
+    if !absent.is_empty() {
+        if let Err(e) = mark_missing(&conn, &absent) {
+            eprintln!("Failed to record missing videos: {}", e);
+        }
+        missing.extend(absent);
+    }
+
+    Ok(VideosResponse { videos, missing })
 }

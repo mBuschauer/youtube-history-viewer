@@ -63,13 +63,13 @@ pnpm run tauri dev
 
 ## Roadmap
 - Bugs
-  - [ ] Fix bug where navigation doesnt work on release version (windows)
-  - [ ] Change app icon
+  - [x] Fix bug where navigation doesnt work on release version (windows)
+  - [x] Change app icon
 - [ ] Properly handle hitting usage limits
   - [ ] Handle invalid API Key
 - [x] Clean up UI
   - [x] Make it look less like a webapp
-  - [ ] Loading Screen
   - [x] Implement UI to display while parsing
-  - [ ] Refetch video from VideoPanel
+  - [x] Refetch video from VideoPanel
+    - [ ] Make it automatically update the panel+grid
   - [x] Dark Mode
