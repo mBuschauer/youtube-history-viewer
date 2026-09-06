@@ -3,8 +3,9 @@
 import React, { useEffect, useState } from 'react';
 import { useSettings } from "@/contexts/SettingsContext";
 import { invoke } from '@tauri-apps/api/core';
+import Link from 'next/link';
 import StatePane from '@/components/StatePane';
-import { LuLoaderCircle, LuEye, LuEyeOff, LuFolderOpen, LuGithub, LuTriangleAlert, LuCircleCheck } from 'react-icons/lu';
+import { LuLoaderCircle, LuEye, LuEyeOff, LuFolderOpen, LuGithub, LuTriangleAlert, LuCircleCheck, LuChevronLeft } from 'react-icons/lu';
 
 type Message = { tone: 'ok' | 'bad'; text: string };
 
@@ -163,8 +164,19 @@ export default function SettingsPage() {
 
 function SettingsHeader() {
     return (
-        <div className="chrome flex h-9 shrink-0 items-center border-b border-line bg-canvas px-2.5">
-            <span className="text-[12px] font-medium text-fg">Settings</span>
+        <div className="flex min-w-0 items-center gap-2">
+            <Link
+                href="/"
+                title="Back to all datasets"
+                className="inline-flex h-6 shrink-0 items-center gap-0.5 rounded-sm pl-1 text-[12px] text-fg-muted transition-colors hover:bg-sunken hover:text-fg"
+            >
+                <LuChevronLeft className="size-3.5" />
+                Datasets
+            </Link>
+            <span className="shrink-0 text-fg-subtle">/</span>
+            <div className="chrome flex h-9 shrink-0 items-center bg-canvas ">
+                <span className="text-[12px] font-medium text-fg">Settings</span>
+            </div>
         </div>
     );
 }

@@ -46,7 +46,13 @@ export default function DatasetRow({ dataset, onDelete }: DatasetRowProps) {
         </p>
       </div>
 
-      <button type="button" onClick={() => onDelete(dataset)} title="Delete dataset"
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onDelete(dataset);
+        }}
+        title="Delete dataset"
         className="relative grid size-7 shrink-0 cursor-pointer place-items-center rounded-sm text-fg-subtle opacity-0 transition-[opacity,color,background-color] duration-150 group-hover:opacity-100 hover:bg-bad-soft hover:text-bad focus-visible:opacity-100"
       >
         <LuTrash2 className="size-3.5" />

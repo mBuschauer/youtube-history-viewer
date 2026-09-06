@@ -7,7 +7,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { open } from '@tauri-apps/plugin-dialog';
 import type { DatasetMetadata } from '@/lib/types';
 import Link from 'next/link';
-import { LuFileInput, LuTriangleAlert, LuLoaderCircle } from 'react-icons/lu';
+import { LuFileInput, LuTriangleAlert, LuLoaderCircle, LuChevronLeft } from 'react-icons/lu';
 
 type ImportVars = { path: string; name: string | null };
 
@@ -49,7 +49,20 @@ export default function UploadWatchHistory() {
     return (
         <div className="flex h-full flex-col">
             <div className="chrome flex h-9 shrink-0 items-center gap-2 border-b border-line bg-canvas px-2.5">
-                <span className="text-[12px] font-medium text-fg">Import watch history</span>
+                <div className="flex min-w-0 items-center gap-2">
+                    <Link
+                        href="/"
+                        title="Back to all datasets"
+                        className="inline-flex h-6 shrink-0 items-center gap-0.5 rounded-sm pl-1 text-[12px] text-fg-muted transition-colors hover:bg-sunken hover:text-fg"
+                    >
+                        <LuChevronLeft className="size-3.5" />
+                        Datasets
+                    </Link>
+                    <span className="shrink-0 text-fg-subtle">/</span>
+                    <span className="max-w-56 truncate text-[12px] font-medium text-fg">
+                        Import watch history
+                    </span>
+                </div>
                 <Link
                     href="/"
                     className="ml-auto inline-flex h-6 items-center rounded-sm px-2 text-[12px] text-fg-muted transition-colors hover:bg-sunken hover:text-fg"
